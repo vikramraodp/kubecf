@@ -48,20 +48,20 @@ set down in __scripts/tools/*__. At the time of writing, these are:
 
 At the time of this writing these were:
 
-| Tool          |             Version | Notes |
-|---------------|---------------------|-------|
-| Kubernetes    |              1.17.5 |       |
-| minikube      |               1.9.2 |       |
-| kind          |               0.6.0 |       |
-| kubectl       |              1.17.0 |       |
-| Helm          |               3.0.3 |       |
-| jq            |                 1.6 |       |
-| python3       |                 3.3 |       |
-| ruby          |                 2.4 |       |
-| shellcheck    |               0.7.0 |       |
-| yamllint      |                1.23 |       |
-| CF Operator   |  6.1.17+0.gec409fd7 |       |
-| cf-deployment |             13.17.0 |       |
+| Tool          | Version          | Notes |
+|---------------|------------------|-------|
+| Kubernetes    | 1.17.5           |       |
+| minikube      | 1.9.2            |       |
+| kind          | 0.6.0            |       |
+| kubectl       | 1.17.0           |       |
+| Helm          | 3.0.3            |       |
+| jq            | 1.6              |       |
+| python3       | 3.3              |       |
+| ruby          | 2.4              |       |
+| shellcheck    | 0.7.0            |       |
+| yamllint      | 1.23             |       |
+| CF Operator   | 7.2.7+0.g3606ded |       |
+| cf-deployment | 17.1.0           |       |
 
 __Note however__: As `kubecf` is updated these versions may change
 from commit to commit.  The table above is therefore

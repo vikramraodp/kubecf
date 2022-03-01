@@ -169,7 +169,6 @@
             exec:
               command:
               - curl
-              - --head
               - --fail
               - --insecure
               - --cert

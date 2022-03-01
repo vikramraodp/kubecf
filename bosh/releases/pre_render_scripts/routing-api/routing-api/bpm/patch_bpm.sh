@@ -28,18 +28,23 @@ if [[ -f "${sentinel}" ]]; then
 fi
 
 patch --verbose "${target}" <<'EOT'
-@@ -11,8 +11,10 @@
-     - -timeFormat
-     - rfc3339
-     - -ip
--    - <%= spec.ip %>
-+    - "$(POD_IP)"
-     <% if p("routing_api.auth_disabled") == true %>- -devMode <% end %>
-+    env:
-+      POD_IP: 0.0.0.0 # Set by k8s using an ops-file with cf-operator.
+@@ -14,7 +14,7 @@
+         "-timeFormat",
+         "rfc3339",
+         "-ip",
+-        spec.ip,
++        "$(POD_IP)",
+       ],
+       "hooks" => {
+         "pre_start" => "/var/vcap/jobs/routing-api/bin/bpm-pre-start"
+@@ -31,5 +31,7 @@
+   bpm['processes'][0]['env'].merge!({"GODEBUG" => "x509ignoreCN=0"})
+ end
 
-     hooks:
-       pre_start: /var/vcap/jobs/routing-api/bin/bpm-pre-start
++bpm['processes'][0]['env'].merge!({"POD_IP" => "0.0.0.0"})
++
+ YAML.dump(bpm)
+ %>
 EOT
 
 sha256sum "${target}" > "${sentinel}"

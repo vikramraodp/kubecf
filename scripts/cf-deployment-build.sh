@@ -22,70 +22,115 @@ function view_release() {
 }
 
 function build_release() {
-#  [[ $SUDO -eq 1 ]] && sudo_command="sudo " | sudo_command=""
-  sudo_command="sudo "
-  [[ $FORCE -eq 1 ]] && force_option="--force " | force_option=""
-  echo "${sudo_command}"
+  registry="${1}"
+  organization="${2}"
+  stemcell_image="${3}"
+  release_name="${4}"
+  release_url="${5}"
+  release_version="${6}"
+  release_sha1="${7}"
+
+  echo -e "Release information:"
+  echo -e "  - Release name:    ${GREEN}${release_name}${NC}"
+  echo -e "  - Release version: ${GREEN}${release_version}${NC}"
+  echo -e "  - Release URL:     ${GREEN}${release_url}${NC}"
+  echo -e "  - Release SHA1:    ${GREEN}${release_sha1}${NC}"
+
+  build_args=(
+    "--stemcell=${stemcell_image}"
+    "--name=${release_name}"
+    "--version=${release_version}"
+    "--url=${release_url}"
+    "--sha1=${release_sha1}"
+    "--docker-registry=${registry}"
+    "--docker-organization=${organization}"
+    "${FORCE_OPTION}"
+  )
+
+  echo -e "Building release ${LIGHT_BLUE}${release_name} v${release_version}${NC} ...\n"
+  ${SUDO_COMMAND} fissile build release-images "${build_args[@]}"
+#  echo -e "Built image: ${GREEN}${built_image}${NC}"
+#  docker push "${built_image}"
+
+#  built_image=$(${SUDO_COMMAND} fissile build release-images --dry-run "${build_args[@]}" | head -2 | tail -1 | cut -d' ' -f3)
+#  echo "${built_image}" >> "${BUILT_IMAGES}"
+#  export DOCKER_CLI_EXPERIMENTAL=enabled
+#  if docker manifest inspect "${built_image}" 2>&1 | grep --quiet "no such manifest"; then
+#      ${SUDO_COMMAND} fissile build release-images "${build_args[@]}"
+#      echo -e "Built image: ${GREEN}${built_image}${NC}"
+#      docker push "${built_image}"
+#      docker rmi "${built_image}"
+#  else
+#      echo -e "Skipping push for ${GREEN}${built_image}${NC} as it is already present in the registry..."
+#  fi
+
+  echo '----------------------------------------------------------------------------------------------------'
+}
+
+function build_all_releases() {
+  echo "${REGISTRY_PASS}" | docker login "${REGISTRY_NAME}" --username "${REGISTRY_USER}" --password-stdin
+  docker pull "${STEMCELL_IMAGE}"
+  export BUILT_IMAGES="${kubecf}/imagelist.txt"
+  export VERSION="${STEMCELL_TAG}"
   for rel in $(yq e -j '.releases' ${src}/cf-deployment/cf-deployment.yml | jq -cr '.[]'); do
-    release_name=$(echo $rel | jq -r '.name' -)
-    release_url=$(echo $rel | jq -r '.url' -)
-    release_version=$(echo $rel | jq -r '.version' -)
-    release_sha1=$(echo $rel | jq -r '.sha1' -)
+    RELEASE_NAME=$(echo $rel | jq -r '.name' -)
+    RELEASE_URL=$(echo $rel | jq -r '.url' -)
+    RELEASE_VERSION=$(echo $rel | jq -r '.version' -)
+    RELEASE_SHA=$(echo $rel | jq -r '.sha1' -)
 
-    build_args=(
-      "--stemcell=${STEMCELL_IMAGE}"
-      "--name=${release_name}"
-      "--version=${release_version}"
-      "--url=${release_url}"
-      "--sha1=${release_sha1}"
-      "${force_option}"
-    )
-
-    echo -e "Building release ${LIGHT_BLUE}${release_name} v${release_version}${NC} ...\n"
-    built_image=$(${sudo_command}fissile build release-images --dry-run "${build_args[@]}" | cut -d' ' -f3)
-    ${sudo_command}fissile build release-images "${build_args[@]}"
-    echo -e "Built image: ${GREEN}${built_image}${NC}"
-
-##    echo "${built_image}" >> "${BUILT_IMAGES}"
-#    export DOCKER_CLI_EXPERIMENTAL=enabled
-#    if docker manifest inspect "${built_image}" 2>&1 | grep --quiet "no such manifest"; then
-#        ${sudo_command}fissile build release-images "${build_args[@]}"
-#        echo -e "Built image: ${GREEN}${built_image}${NC}"
-#    else
-#        echo -e "Skipping push for ${GREEN}${built_image}${NC} as it is already present in the registry..."
-#    fi
-
-    echo '----------------------------------------------------------------------------------------------------'
-
+    build_release "${REGISTRY_NAME}" "${REGISTRY_NAMESPACE}" "${STEMCELL_IMAGE}" "${RELEASE_NAME}" "${RELEASE_URL}" "${RELEASE_VERSION}" "${RELEASE_SHA}"
   done
 }
 
 GREEN='\033[0;32m'
 LIGHT_BLUE='\033[1;34m'
 NC='\033[0m'
-SUDO=0
-FORCE=0
 STEMCELL_IMAGE=splatform/fissile-stemcell-sle
+STEMCELL_TAG=""
+BUILD=0
+REGISTRY_NAME=""
+REGISTRY_NAMESPACE=""
+REGISTRY_USER=""
+REGISTRY_PASS=""
+SUDO_COMMAND=""
+FORCE_OPTION=""
 
 while [ "$1" != "" ];
 do
    case $1 in
     -S | --stemcell )
         shift
-        STEMCELL_IMAGE="${STEMCELL_IMAGE}:${1}"
-        export VERSION=${1}
+        STEMCELL_TAG="${1}"
+        STEMCELL_IMAGE="${STEMCELL_IMAGE}:${STEMCELL_TAG}"
         ;;
     -P | --sudo )
-        SUDO=1
+        SUDO_COMMAND="sudo -E"
         ;;
     -F | --force )
-        FORCE=1
+        FORCE_OPTION="--force"
+        ;;
+    -R | --registry )
+        shift
+        REGISTRY_NAME="${1}"
+        ;;
+    -U | --username )
+        shift
+        REGISTRY_USER="${1}"
+        ;;
+    -W | --password )
+        shift
+        REGISTRY_PASS="${1}"
+        ;;
+    -N | --namespace )
+        shift
+        REGISTRY_NAMESPACE="${1}"
         ;;
     -B | --build )
-        build_release
+        BUILD=1
         ;;
     -V | --version )
         view_release
+        exit
         ;;
     -H | --help )
          echo "Usage: cf-deployment-build [OPTIONS]"
@@ -93,6 +138,10 @@ do
          echo "   -S | --stemcell - The source stemcell tag"
          echo "   -P | --sudo - If specified, uses sudo privilege to build images"
          echo "   -F | --force - If specified, image creation will proceed even when images already exist"
+         echo "   -R | --registry - The name of the container registry to push the images"
+         echo "   -N | --namespace - The namespace of the container registry to push the images"
+         echo "   -U | --username - The username for authenticating with the container registry"
+         echo "   -W | --password - The password for authenticating with the container registry"
          echo "   -B | --build - Builds Docker images from cf-deployment BOSH releases"
          echo "   -V | --version - prints out version information of cf-deployment BOSH releases"
          echo "   -H | --help - displays this message"
@@ -104,6 +153,9 @@ do
         echo "   -S | --stemcell - The source stemcell tag"
         echo "   -P | --sudo - If specified, uses sudo privilege to build images"
         echo "   -F | --force - If specified, image creation will proceed even when images already exist"
+        echo "   -R | --registry - The url of the container registry to push the images"
+        echo "   -U | --username - The username for authenticating with the container registry"
+        echo "   -W | --password - The password for authenticating with the container registry"
         echo "   -B | --build - Builds Docker images from cf-deployment BOSH releases"
         echo "   -V | --version - prints out version information of cf-deployment BOSH releases"
         echo "   -H | --help - displays this message"
@@ -113,3 +165,5 @@ do
   esac
   shift
 done
+
+[[ $BUILD -eq 1 ]] && build_all_releases

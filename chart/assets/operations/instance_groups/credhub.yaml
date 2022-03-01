@@ -31,6 +31,11 @@
             component: credhub
           uris:
           - credhub.((system_domain))
+      nats:
+        tls:
+          client_cert: ((nats_client_cert.certificate))
+          client_key: ((nats_client_cert.private_key))
+          enabled: true
 
 - type: replace
   path: /instance_groups/name=credhub/jobs/-

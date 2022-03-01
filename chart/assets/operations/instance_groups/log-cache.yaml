@@ -78,7 +78,17 @@
             # Unfortunately, by default the health port listens on localhost only
             # and isn't easily configurable.
             exec:
-              command: [curl, --fail, --head, --silent, http://localhost:6061/debug/pprof/cmdline]
+              command:
+              - curl
+              - --insecure
+              - --fail
+              - --head
+              - --silent
+              - --cert
+              - /var/vcap/jobs/log-cache/config/certs/metrics.crt
+              - --key
+              - /var/vcap/jobs/log-cache/config/certs/metrics.key
+              - https://localhost:6061/metrics
 
 # Add quarks properties for log-cache-cf-auth-proxy.
 - type: replace
