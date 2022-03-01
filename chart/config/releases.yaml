@@ -7,10 +7,10 @@
 releases:
   # The defaults for all releases, where we do not otherwise override them.
   '$defaults':
-    url: docker.io/vikramdp
+    url: docker.io/vikramraophil
     stemcell:
-      os: SLE_15_SP2
-      version: 29.18-7.0.0_374.gb8e8e6af
+      os: opensuse
+      version: 42.3
   app-autoscaler:
     condition: features.autoscaler.enabled
     version: 3.0.1
