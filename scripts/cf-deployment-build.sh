@@ -85,7 +85,7 @@ function build_all_releases() {
 GREEN='\033[0;32m'
 LIGHT_BLUE='\033[1;34m'
 NC='\033[0m'
-STEMCELL_IMAGE=vikramraophil/fissile-stemcell-opensuse
+STEMCELL_IMAGE=splatform/fissile-stemcell-opensuse
 STEMCELL_TAG=""
 BUILD=0
 REGISTRY_NAME=""
