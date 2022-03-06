@@ -17,7 +17,7 @@
           readiness:
             exec:
               command:
-                - "/usr/bin/nc"
+                - "/bin/nc"
                 - "-z"
                 - "127.0.0.1"
                 - "8891"
