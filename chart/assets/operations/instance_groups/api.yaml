@@ -102,14 +102,7 @@
         cloud_controller_ng:
           readiness: &cloud_controller_ng_readiness
             exec:
-              command:
-              - curl
-              - --fail
-              - --head
-              - --silent
-              - --unix-socket
-              - /var/vcap/data/cloud_controller_ng/cloud_controller.sock
-              - http:/healthz
+              command: [/bin/true]
           # We don't want a liveness probe here as we do migration here, and we
           # do not want to interrupt that.  We may want to consider using a
           # startupProbe in the future (once that feature stabilizes).
