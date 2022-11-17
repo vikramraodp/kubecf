@@ -11,12 +11,6 @@ move_jobs:
     routing-api: routing-api
   scheduler:
     auctioneer: auctioneer
-  doppler:
-    log-cache: log-cache
-    log-cache-gateway: log-cache
-    log-cache-nozzle: log-cache
-    log-cache-cf-auth-proxy: log-cache
-    route_registrar: log-cache
   diego-api:
     locket: locket
 
