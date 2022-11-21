@@ -115,7 +115,7 @@ jobs:
     '$default': 'features.credhub.enabled'
     # Added via ops in assets/operations/instance_groups/credhub.yaml
     route_registrar: ~
-    cf-cli-7-linux:
+    cf-cli-8-linux:
       processes: [credhub-internal-security-group-setup]
   database:
     # database instance group is replaced by native release
@@ -145,7 +145,7 @@ jobs:
   smoke-tests:
     '$default': 'testing.smoke_tests.enabled'
     # Added via ops in assets/operations/instance_groups/smoke-tests.yaml
-    cf-cli-7-linux:
+    cf-cli-8-linux:
       processes: []
   singleton-blobstore:
     '$default': '!features.external_blobstore.enabled'
@@ -158,7 +158,7 @@ jobs:
       processes: [rotate]
   uaa:
     # Added via ops in assets/operations/instance_groups/uaa.yaml
-    cf-cli-7-linux:
+    cf-cli-8-linux:
       condition: 'features.credhub.enabled'
       processes: [uaa-internal-security-group-setup]
 
