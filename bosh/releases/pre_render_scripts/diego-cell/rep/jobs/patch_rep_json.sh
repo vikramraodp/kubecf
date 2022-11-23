@@ -14,7 +14,9 @@ fi
 
 # Don't share /var/vcap/packages between containers.
 patch --verbose "${target}" <<'EOT'
-@@ -39,7 +39,7 @@
+--- /mnt/d/Temp/delete/kubecf_release/patches/rep.json.erb	2022-01-31 22:07:07.000000000 +0530
++++ /mnt/d/Temp/delete/kubecf_release/patches/rep.json-modified.erb	2022-11-23 20:43:44.368565900 +0530
+@@ -58,7 +58,7 @@
      disk_mb: p("diego.executor.disk_capacity_mb").to_s,
      enable_consul_service_registration: p("enable_consul_service_registration"),
      enable_declarative_healthcheck: p("enable_declarative_healthcheck"),
@@ -23,7 +25,7 @@ patch --verbose "${target}" <<'EOT'
      enable_container_proxy: p("containers.proxy.enabled"),
      container_proxy_require_and_verify_client_certs: p("containers.proxy.require_and_verify_client_certificates"),
      container_proxy_trusted_ca_certs: p("containers.proxy.trusted_ca_certificates"),
-@@ -49,7 +49,7 @@
+@@ -68,7 +68,7 @@
      enable_unproxied_port_mappings: p("containers.proxy.enable_unproxied_port_mappings"),
      proxy_memory_allocation_mb: p("containers.proxy.additional_memory_allocation_mb"),
      proxy_enable_http2: p("containers.proxy.enable_http2"),

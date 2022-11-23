@@ -23,9 +23,34 @@ patch --verbose "${target}" <<'EOT'
  
    def compute_mtu
      vxlan_overhead = 50
-@@ -41,6 +42,14 @@
+@@ -13,6 +14,15 @@
      end
    end
+ 
++  def get_ipaddress(ip, var_name)
++    if (var_name == 'dns_servers')
++      if !(ip =~ Regexp.union([Resolv::IPv4::Regex, Resolv::IPv6::Regex]))
++        return Resolv.getaddress ip
++      end
++    end
++    return IPAddr.new ip
++  end
++
+   # this method is here to check for leading 0s
+   def parse_ips (ips, var_name)
+     ips.map {|ip| ip.split(":")[0]}.each do |ip|
+@@ -23,7 +33,7 @@
+   def parse_ip (ip, var_name)
+     unless ip.empty?
+         begin 
+-          parsed = IPAddr.new ip
++          parsed = get_ipaddress ip, var_name
+         rescue  => e
+           raise "Invalid #{var_name} '#{ip}': #{e}"
+         end
+@@ -64,6 +74,13 @@
+   parse_ips(p('host_tcp_services'), 'host_tcp_services')
+   parse_ips(p('host_udp_services'), 'host_udp_services')
  
 +  dns_servers = p('dns_servers').map do |dns_server|
 +    if !(dns_server =~ Regexp.union([Resolv::IPv4::Regex, Resolv::IPv6::Regex]))
@@ -34,11 +59,10 @@ patch --verbose "${target}" <<'EOT'
 +      dns_server
 +    end
 +  end
-+
+ 
    toRender = {
      'name' => 'cni-wrapper',
-     'cniVersion' => '0.3.1',
-@@ -61,7 +70,7 @@
+@@ -85,7 +102,7 @@
        'ingress_tag' => 'ffff0000',
        'vtep_name' => 'silk-vtep',
        'policy_agent_force_poll_address' => '127.0.0.1:' + link('vpa').p('force_policy_poll_cycle_port').to_s,
