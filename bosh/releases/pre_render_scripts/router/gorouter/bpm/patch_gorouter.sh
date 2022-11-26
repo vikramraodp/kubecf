@@ -24,23 +24,14 @@ if [[ -f "${sentinel}" ]]; then
 fi
 
 patch --verbose "${target}" <<'EOT'
-@@ -282,16 +282,6 @@
-     if !cert_pair.is_a?(Hash) || !cert_pair.key?('cert_chain') || !cert_pair.key?('private_key')
-       raise 'must provide cert_chain and private_key with tls_pem'
-     end
--
--    cert = OpenSSL::X509::Certificate.new cert_pair['cert_chain']
--    has_san = cert.extensions.map { |ext|
--      x509ext = OpenSSL::X509::Extension.new ext
--      x509ext.oid == "2.5.29.17" || x509ext.oid == "subjectAltName" # https://oidref.com/2.5.29.17
--    }.reduce(:|)
--
--    if ! p('golang.x509ignoreCN') and ! has_san
--      raise "tls_pem[#{i}].cert_chain must include a subjectAltName extension"
--    end
-   }
-
-   params['tls_pem'] = p('router.tls_pem')
+@@ -1,5 +1,7 @@
+ ---
+ <%=
++require 'openssl'
++
+ def property_or_link(description, property, link_path, link_name=nil, optional=false)
+   link_name ||= link_path.split('.').first
+   if_p(property) do |prop|
 EOT
 
 sha256sum "${target}" > "${sentinel}"
