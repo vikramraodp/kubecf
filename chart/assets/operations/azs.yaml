@@ -27,6 +27,8 @@
   path: /instance_groups/name=doppler/azs?
 - type: remove
   path: /instance_groups/name=log-api/azs?
+- type: remove
+  path: /instance_groups/name=log-cache/azs?
 
 {{- if .Values.features.routing_api.enabled }}
 - type: remove
