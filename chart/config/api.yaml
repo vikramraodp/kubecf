@@ -1,9 +1,9 @@
 properties:
   api:
     cloud_controller_ng:
-      name: KubeCF
+      name: HSOP-KubeCF
       version: 2
-      description: 'CloudFoundry KubeCF'
+      description: 'HealthSuite OnPremise CloudFoundry KubeCF'
       support_address: 'https://kubecf.io/'
       build: {{ default .Chart.Version .Chart.AppVersion | quote }}
 
